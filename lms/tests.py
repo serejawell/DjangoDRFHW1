@@ -245,3 +245,31 @@ class LessonTest(APITestCase):
         self.client.force_authenticate(user=self.moderator_user)
         response = self.client.delete(f"/learning/lessons/{self.lesson.id}/")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_subscription_for_authenticated_user_with_subscription(self):
+        """
+        Проверяет, что авторизованный пользователь с подпиской видит свою подписку.
+        """
+        self.client.force_authenticate(user=self.owner_user)
+        Subscription.objects.create(user=self.owner_user, course=self.course)
+        response = self.client.get("/users/subs/")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data[0]["course"], self.course.id)
+
+    def test_subscription_for_authenticated_user_without_subscription(self):
+        """
+        Проверяет, что авторизованный пользователь без подписки видит пустой список.
+        """
+        self.client.force_authenticate(user=self.owner_user)
+        response = self.client.get("/users/subs/")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 0)
+
+    def test_subscription_for_unauthenticated_user(self):
+        """
+        Проверяет, что неавторизованный пользователь получает ошибку доступа.
+        """
+        response = self.client.get("/users/subs/")
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        self.assertEqual(response.data["detail"], "Authentication credentials were not provided.")

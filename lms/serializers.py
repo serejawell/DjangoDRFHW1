@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from lms.models import Course, Lesson
+from lms.models import Course, Lesson, Subscription
 from lms.validators import validate_youtube_url
 
 
@@ -16,10 +16,18 @@ class LessonSerializer(serializers.ModelSerializer):
 
 class CourseSerializer(serializers.ModelSerializer):
     """Сериализатор для курсов"""
+    is_subscribed = serializers.SerializerMethodField()
 
     class Meta:
         model = Course
         fields = '__all__'
+
+    def get_is_subscribed(self, obj):
+        """Проверяем, есть ли подписка у текущего пользователя на этот курс."""
+        user = self.context['request'].user
+        if user.is_authenticated:
+            return Subscription.objects.filter(user=user, course=obj).exists()
+        return False
 
 
 class CourseDetailSerializer(serializers.ModelSerializer):

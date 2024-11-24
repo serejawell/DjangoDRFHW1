@@ -16,6 +16,12 @@ class CourseViewSet(ModelViewSet):
     serializer_class = CourseSerializer
     pagination_class = CustomPagination
 
+    def get_serializer_context(self):
+        """Передаем текущий запрос в сериализатор."""
+        context = super().get_serializer_context()
+        context['request'] = self.request
+        return context
+
     def get_serializer_class(self):
         if self.action == 'retrieve':
             return CourseDetailSerializer
@@ -24,7 +30,7 @@ class CourseViewSet(ModelViewSet):
     def get_permissions(self):
         if self.action == 'create':
             self.permission_classes = (~IsModer,)
-        elif self.action in ['update','retrieve']:
+        elif self.action in ['update', 'retrieve']:
             self.permission_classes = (IsModer | IsOwner,)
         elif self.action == 'destroy':
             self.permission_classes = (~IsModer | IsOwner,)
@@ -35,8 +41,10 @@ class CourseViewSet(ModelViewSet):
         course.owner = self.request.user
         course.save()
 
+
 class SubscriptionView(APIView):
     permission_classes = [IsAuthenticated]
+
     def post(self, request, *args, **kwargs):
         user = request.user
         course_id = request.data.get('course_id')
@@ -49,6 +57,7 @@ class SubscriptionView(APIView):
             Subscription.objects.create(user=user, course=course)
             message = 'Подписка добавлена'
         return Response({"message": message})
+
 
 class LessonListAPIView(ListAPIView):
     queryset = Lesson.objects.all()
@@ -66,18 +75,20 @@ class LessonCreateAPIView(CreateAPIView):
         lesson.owner = self.request.user
         lesson.save()
 
+
 class LessonRetrieveAPIView(RetrieveAPIView):
     queryset = Lesson.objects.all()
     serializer_class = LessonSerializer
     permission_classes = (IsAuthenticated, IsModer | IsOwner)
+
 
 class LessonUpdateAPIView(UpdateAPIView):
     queryset = Lesson.objects.all()
     serializer_class = LessonSerializer
     permission_classes = (IsAuthenticated, IsModer | IsOwner)
 
+
 class LessonDestroyAPIView(DestroyAPIView):
     queryset = Lesson.objects.all()
     serializer_class = LessonSerializer
     permission_classes = (IsAuthenticated, IsOwner | ~IsModer)
-
