@@ -28,7 +28,9 @@ class Payment(models.Model):
 
     user = models.ForeignKey(
         User,
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
         verbose_name='Пользователь'
     )
     payment_date = models.DateField(
@@ -49,15 +51,25 @@ class Payment(models.Model):
         null=True,
         verbose_name='Оплаченный урок'
     )
-    amount = models.DecimalField(
-        max_digits=10,
-        decimal_places=2,
-        verbose_name='Сумма оплаты'
+    amount = models.PositiveIntegerField(
+        verbose_name='Сумма оплаты',
     )
     payment_method = models.CharField(
         max_length=10,
         choices=PAYMENT_METHODS,
         verbose_name='Способ оплаты'
+    )
+    link = models.URLField(
+        max_length=400,
+        blank=True,
+        null=True,
+        verbose_name='Ссылка на оплату'
+    )
+    session_id = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True,
+        verbose_name='ID сессии'
     )
 
     class Meta:

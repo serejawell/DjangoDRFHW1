@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'users',
     'lms',
+    'drf_yasg',
 ]
 
 MIDDLEWARE = [
@@ -147,3 +148,6 @@ SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
 }
+
+STRIPE_API_KEY = os.getenv('STRIPE_API_KEY')
+CURRENCY_API_KEY = os.getenv('CURRENCY_API_KEY')
