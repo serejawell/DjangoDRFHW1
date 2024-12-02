@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'users',
     'lms',
     'drf_yasg',
+    'django_celery_beat'
 ]
 
 MIDDLEWARE = [
@@ -151,3 +152,9 @@ SIMPLE_JWT = {
 
 STRIPE_API_KEY = os.getenv('STRIPE_API_KEY')
 CURRENCY_API_KEY = os.getenv('CURRENCY_API_KEY')
+
+
+CELERY_BROKER_URL = os.getenv('REDIS_URL', 'redis://localhost:6379/0')
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'UTC'  # Замените на свой таймзон, если нужно

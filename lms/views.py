@@ -9,6 +9,7 @@ from lms.models import Course, Lesson, Subscription
 from lms.paginations import CustomPagination
 from lms.serializers import CourseSerializer, LessonSerializer, CourseDetailSerializer
 from users.permissions import IsModer, IsOwner
+from .tasks import send_course_update_email
 
 
 class CourseViewSet(ModelViewSet):
@@ -21,6 +22,11 @@ class CourseViewSet(ModelViewSet):
         context = super().get_serializer_context()
         context['request'] = self.request
         return context
+
+    def perform_update(self, serializer):
+        instance = serializer.save()
+        for subscriber in instance.subscribers.all():
+            send_course_update_email.delay(subscriber.email, instance.name)
 
     def get_serializer_class(self):
         if self.action == 'retrieve':
